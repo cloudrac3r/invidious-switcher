@@ -1,0 +1,127 @@
+// All keys in this file are required except where noted.
+{
+	// Settings for the logger
+	"logger": {
+		// What level of events (and above) should be logged?
+		// 0: spam, 1: info, 2: warn, 3: error. 0 logs everything. The logs are quite pretty :)
+		"defaultLevel": 0
+	},
+	// Which instances would you like to use?
+	"instances": [
+		// An instance can be a plain URL like this:
+		"https://invidio.us",
+		// Or an object like this. invidiou.sh requires cookies, so we enable them here.
+		{
+			"site": "https://invidiou.sh",
+			"options": {
+				"useCookies": true
+			}
+		},
+		// Add whatever instances you want.
+		{
+			"site": "http://localhost:3000",
+			"options": {
+				// Here are all the available options for an instance.
+				// Everything inside here is optional.
+				"useCookies": true, // enable an isolated cookie jar for this instance
+				"trackingMethod": "video", // override for .tracking.method
+				"headers": { // custom headers to merge on top of .http.headers
+					"User-Agent": "NotAnEvilBot/1.6.9"
+				}
+			}
+		}
+	],
+	// You can also fetch a list of instances from another site, like https://instances.invidio.us (now referred to as IIVS)
+	"fetch": {
+		// Whether to fetch or not.
+		"enabled": true,
+		// IIVS comes with a built-in health metric, but it isn't very reliable.
+		// However, it is safe to assume that instances with an extremely low health will be totally offline (not just blocked, _offline_) forever.
+		// ignoreDead assumes that instances with health === 0 are not worth trying and discards them.
+		"ignoreDead": true,
+		// Did you know that IIVS is selfhostable? Pick where you want to retrieve it from.
+		"url": "https://instances.invidio.us/instances.json",
+		// In Invidious version 0.20.0 (in fact, the very commit before), a custom message was added to the API to say if the instance is blocked or not.
+		// Before this version, invalid video IDs and blocked instances produced the exact same error message.
+		// Some instances are still not updated to 0.20.0. You have three main options, which also have to be adjusted further down in .detection.considerUnavailableAsBlocked:
+		// 1. Only use instances with version 0.20.0 or later to remove any ambiguity.
+		// 2. Assume instances that say "video unavailable" are blocked rather than just bad ID. This is suboptimal.
+		// 3. Assume instances that say "video unavailable" are not blocked, but the ID is just bad. This is probably a terrible idea, but it's possible if you want it.
+		// This setting allows you to restrict fetched instances to a specific version or later. It does not affect the list in this file, and it does not affect the treatment of error messages.
+		"requireVersion": {
+			// Would you like to only use instances with a certain version?
+			"enabled": true,
+			// Which version? (Blocked reports were added in 0.20.0)
+			"version": "0.20.0",
+			// Normally we get the version from /api/v1/stats, which is handily included in the response from IIVS.
+			// However, some instances disable stats.
+			// It is still possible to get the version by requesting the home page and trying to detect the version number from the contents of the footer, but this is quite slow and might still fail.
+			// Would you like to try to request the home page if stats is not available?
+			"fallbackToHome": true,
+			// If we couldn't detect the version using the above settings, should the instance still be used? Examples:
+			// If 0.20.0 required and useIfNoVersion = false: 0.19.0 = no, 0.20.0 = yes, detection failed = no
+			// If 0.20.0 required and useIfNoVersion = true: 0.19.0 = no, 0.20.0 = yes, detection failed = yes
+			"useIfNoVersion": false
+		}
+	},
+	// When and how should we switch between instances?
+	"switching": {
+		// "fastest": Pick the fastest instance based on its recent reports. Useful for one-off requests.
+		// "roundrobin": Go through all instances in a loop. Useful for sending many requests at once.
+		// "random": Choose a random instance. The same instance might be picked many times in a row, or it might now.
+		"method": "fastest",
+		// The last used instance is stored. If you want, you can keep using this instance and only change when it stops working.
+		"preferSame": false,
+		// If true, all of the above will only pick from _working_ instances, and never from broken or blocked instances.
+		// Only selecting from working instances is kind of the point of invidious-switcher.
+		// You almost certainly want this to be turned on.
+		"onlyWorking": true
+	},
+	// Whether and how should we track instance uptime in the background?
+	"tracking": {
+		// Enable to track instances in the background by occasionally sending requests.
+		// This helps to detect if an instance become blocked before an important request is actually attempted on it. This will speed up actual requests from your application.
+		// Remember that even if this is turned off, stats are still tracked when your application requests from an instance.
+		// If this is disabled, instances that go down will never be attempted again, and you may run out of instances and cause all requests to fail if your application runs for a long time.
+		// However, this obviously sends useless requests, which can increase both your bandwidth consumption as well as slow down the instance or block it sooner.
+		// **Please track conservatively.**
+		"enabled": true,
+		// Only track non-working instances to see when they come back up. Do not track working instances.
+		// If a request to a supposedly working instance fails, it will go into the broken list, and will be repeatedly requested until it comes back.
+		"onlyDead": true,
+		// What should we request from the instance to check if it works?
+		// "home": Request the homepage, /feed/trending. This checks if the instance is functional, but it might still be IP blocked.
+		// "stats": Requests /api/v1/stats. Many instances have this disabled.
+		// "video": Requests /api/v1/videos/dQw4w9WgXcQ. This actually checks if the instance is IP blocked, but this also puts additional load on the instance.
+		// "channel": Requests /api/v1/channels/UC38IQsAvIsxxjztdMZQtwHA. I'm unsure of the nuances of this, but it's here if you want it.
+		"method": "video",
+		// How frequently should we check instances?
+		// This value is milliseconds: 60000 = 60 seconds = 1 minute. A minimum of 20000 = 20 seconds is enforced. Please don't send more requests than necessary.
+		// If requests are still in progress when the interval is triggered, that round will be skipped.
+		"interval": 30000,
+		// Should multiple instances be checked at the same time? It will be significantly faster to do so, but slow networks will have unreliable timing results.
+		"parallel": true
+	},
+	// How to analyse the data from an instance and its history to declare if it works or not.
+	"detection": {
+		// Remember .fetch.requireVersion above? Go and look at it again for a reminder.
+		// Should instances that say "video unavailable" be considered as blocked?
+		// (Instances that say "instance is blocked" will always be considered as blocked.)
+		"considerUnavailableAsBlocked": false,
+		// Some instances may be acceptable despite being unreliable.
+		// This is a number from 0-1, and instances are considered to "work" if that proportion of _recent_ requests succeeded.
+		// 1 means 100% _recent_ uptime is required for an instance to be considered to "work".
+		"acceptableWorkingRate": 1,
+		// The median rather than the mean will be used to calculate the average of an instance working. This will likely mess up acceptableWorkingRate.
+		"useMedianWorking": false,
+		// The median rather than the mean will be used to calculate the average time. Set true to make the average less affected by outliers.
+		"useMedianTime": true
+	},
+	// Default http/s request options object. This is fed directly to wumpfetch. Everything inside here is optional.
+	"http": {
+		"headers": {
+			"Accept": "*/*",
+			"User-Agent": "InvidiousSwitcher/$version (https://github.com/cloudrac3r/invidious-switcher)" // $version will be replaced with the version from package.json.
+		}
+	}
+}

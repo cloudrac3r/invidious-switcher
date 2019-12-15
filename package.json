@@ -1,0 +1,18 @@
+{
+  "name": "invidious-switcher",
+  "version": "0.1.0",
+  "description": "Monitor Invidious instances and automatically route requests through the best one",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["invidious"],
+  "author": "cloudrac3r",
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "fast-html-parser": "^1.0.1",
+    "semver": "^6.3.0",
+    "tough-cookie": "^3.0.1",
+    "wumpfetch": "^0.3.1"
+  }
+}
