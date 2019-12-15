@@ -60,11 +60,15 @@ Config is created by Switcher and manages settings for all the linked parts of i
 
 Config takes a filename to read settings from. If you do not provide a filename, it will read from `/config.json`. This file can contain single-line comments, which are stripped as the contents are read.
 
+All documentation of the contents of the config file is in these comments. Open the file and take a look.
+
 When passed a different filename, the settings are entirely replaced with the contents of that file, rather than merged with the defaults! Therefore, when using your own config, you must supply a complete file. You cannot supply a partial file to override the defaults.
 
 It is likely that you will want to use some different settings. Even if you like the defaults, `/config.json` in this repo will change in later versions. This could cause unexpected behaviour in your application. Therefore, you should create and use your own config file whenever you use invidious-switcher.
 
 **Please copy `/config.json` from this repo into your application, modify it as needed, and load it from Switcher.**
+
+Some suggested config files for specific use cases are available in the `/suggested_configs` folder. If you would like to use a suggested config, simply copy it into your application as normal.
 
 ## Switcher
 
