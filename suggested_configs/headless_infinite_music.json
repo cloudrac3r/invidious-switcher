@@ -1,23 +1,19 @@
-// This template config is designed for desktop apps that play YouTube videos in a custom player.
+// This template config is designed for a headless program that runs on a server and continuously streams music, crawling across recommended videos.
 // As always, copy it into your application and adjust it as you see fit.
 // Remember that you can adjust values while your application is running.
-// This may be useful for example to switch to roundrobin mode before requesting a lot of channels, and then switch back to fastest afterwards.
-// Another example is to enable parallel mode when the application is first launched to get a fast startup, then disable it afterwards to use bandwidth more conservatively.
 
 // ============
 
 // Notable settings and ideas:
-// Many people will be using this app, so it's important to make as few useless requests as possible to avoid overloading servers.
-// .fetch.requireVersion.fallbackToHome = true: the users will be very upset if all instances are down, so we want as many potential instances as possible.
-// .switching.method = "fastest": obviously we want pages to load as quickly as possible.
-// -- HOWEVER: it may be useful to temporarily switch this to "roundrobin" while loading videos from many channels.
-// .tracking.onlyDead = true: don't waste bandwidth requesting instances that probably still work. if they don't work, we'll know soon enough.
-// .tracking.method = "video": users will want to watch videos, so it's important to find instances that can load videos.
-// .tracking.interval = 180000: infrequent requests to waste little bandwidth and make few useless requests.
-// .tracking.parallel = true: we want to start up as quickly as possible.
-// -- HOWEVER: it may be useful to set this to false after first start to reduce bandwidth consumption.
-// .detection.acceptableWorkingRate = 0.75: the worst thing that can happen is that all instances are offline, so be a little more lenient on unreliable instances.
-// .detection.useMedianTime = true: home neworks greatly vary, and the median will reduce noise.
+// Infinite music. We want constant music and we don't want to wait for it.
+// .instances: localhost:3000: program runs on a server and the server has its own instance.
+// .fetch.enabled = false: save time by not fetching, but instead using a vetted selection of trusted, fast, up-to-date, working instances.
+// .switching.method = "fastest": we'll only be doing one request at a time, no bulk, so fastest is most sensible.
+// .tracking.onlyDead = false: keep tracking alive instances for their speed.
+// .tracking.interval = 120000: about the length of a typical song, so should pick up changes to instances as they are needed.
+// .tracking.parallel = false: get the most accurate numbers and also don't flood bandwidth which might stutter streaming.
+// .detection.acceptableWorkingRate = 1: don't send important requests to unreliable instances.
+// .detection.useMedianTime = false: the server has a stable network connection, so occasional latency is a problem with the instance, not with us.
 
 // ============
 
@@ -27,10 +23,13 @@
 	"logger": {
 		// What level of events (and above) should be logged?
 		// 0: spam, 1: info, 2: warn, 3: error. 0 logs everything. The logs are quite pretty :)
-		"defaultLevel": 1
+		"defaultLevel": 0
 	},
 	// Which instances would you like to use?
 	"instances": [
+		"http://localhost:3000",
+		"https://invidio.us",
+		"https://invidious.snopyta.org",
 		{
 			"site": "https://invidiou.sh",
 			"options": {
@@ -41,7 +40,7 @@
 	// You can also fetch a list of instances from another site, like https://instances.invidio.us (now referred to as IIVS)
 	"fetch": {
 		// Whether to fetch or not.
-		"enabled": true,
+		"enabled": false,
 		// IIVS comes with a built-in health metric, but it isn't very reliable.
 		// However, it is safe to assume that instances with an extremely low health will be totally offline (not just blocked, _offline_) forever.
 		// ignoreDead assumes that instances with health === 0 are not worth trying and discards them.
@@ -95,7 +94,7 @@
 		"enabled": true,
 		// Only track non-working instances to see when they come back up. Do not track working instances.
 		// If a request to a supposedly working instance fails, it will go into the broken list, and will be repeatedly requested until it comes back.
-		"onlyDead": true,
+		"onlyDead": false,
 		// What should we request from the instance to check if it works?
 		// "home": Request the homepage, /feed/trending. This checks if the instance is functional, but it might still be IP blocked.
 		// "stats": Requests /api/v1/stats. Many instances have this disabled.
@@ -105,9 +104,9 @@
 		// How frequently should we check instances?
 		// This value is milliseconds: 60000 = 60 seconds = 1 minute. A minimum of 20000 = 20 seconds is enforced. Please don't send more requests than necessary.
 		// If requests are still in progress when the interval is triggered, that round will be skipped.
-		"interval": 180000,
+		"interval": 120000,
 		// Should multiple instances be checked at the same time? It will be significantly faster to do so, but slow networks will have unreliable timing results.
-		"parallel": true
+		"parallel": false
 	},
 	// How to analyse the data from an instance and its history to declare if it works or not.
 	"detection": {
@@ -118,11 +117,11 @@
 		// Some instances may be acceptable despite being unreliable.
 		// This is a number from 0-1, and instances are considered to "work" if that proportion of _recent_ requests succeeded.
 		// 1 means 100% _recent_ uptime is required for an instance to be considered to "work".
-		"acceptableWorkingRate": 0.75,
+		"acceptableWorkingRate": 1,
 		// The median rather than the mean will be used to calculate the average of an instance working. This will likely mess up acceptableWorkingRate.
 		"useMedianWorking": false,
 		// The median rather than the mean will be used to calculate the average time. Set true to make the average less affected by outliers.
-		"useMedianTime": true
+		"useMedianTime": false
 	},
 	// Default http/s request options object. This is fed directly to wumpfetch. Everything inside here is optional.
 	"http": {
