@@ -1,6 +1,6 @@
 {
   "name": "invidious-switcher",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Monitor Invidious instances and automatically route requests through the best one",
   "main": "index.js",
   "scripts": {
