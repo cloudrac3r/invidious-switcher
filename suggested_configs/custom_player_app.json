@@ -129,6 +129,7 @@
 		"headers": {
 			"Accept": "*/*",
 			"User-Agent": "InvidiousSwitcher/$version (https://github.com/cloudrac3r/invidious-switcher)" // $version will be replaced with the version from package.json.
-		}
+		},
+		"timeout": 15000
 	}
 }

@@ -6,12 +6,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["invidious"],
+  "keywords": [
+    "invidious"
+  ],
   "author": "cloudrac3r",
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "fast-html-parser": "^1.0.1",
+    "merge-options": "^2.0.0",
     "semver": "^6.3.0",
+    "strip-json-comments": "^3.0.1",
     "tough-cookie": "^3.0.1",
     "wumpfetch": "^0.3.1"
   }

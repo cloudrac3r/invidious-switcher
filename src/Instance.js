@@ -3,6 +3,7 @@
 const wumpfetch = require("wumpfetch")
 const tc = require("tough-cookie")
 const fhp = require("fast-html-parser")
+const merge = require("merge-options")
 const {EventEmitter} = require("events")
 const timer = require("./timer")
 const stats = require("./stats")
@@ -127,14 +128,14 @@ class Instance {
 				return match[1]
 			}, null)
 			if (!version) return Promise.reject("Version not detectable")
-			this.logger.log("spam", "ver  ", " :) ", "|", this.site, "->", version)
+			this.logger.log("spam", "ver  ", "avai", "|", this.site, "->", version)
 			return version
 		}).catch(error => {
 			if (Array.isArray(error)) {
 				const [time] = error
 				this._addRecord("home", false, time)
 			}
-			this.logger.log("spam", "ver  ", " ?? ", "|", this.site)
+			this.logger.log("spam", "ver  ", "x   ", "|", this.site)
 			return Promise.reject(error)
 		})
 	}
@@ -243,7 +244,7 @@ class Instance {
 	checkChannel(id = "UC38IQsAvIsxxjztdMZQtwHA") {
 		return this.requestChannel(id).then(() => true, () => false)
 	}
-	
+
 	requestChannelVideos(id) {
 		return this.makeAPIRequest("channel", `/api/v1/channels/${id}/videos`)
 	}
@@ -258,7 +259,7 @@ class Instance {
 			? endpoint
 			: this.site + endpoint
 		if (!options.headers) options.headers = {}
-		if (this.config.settings.http && this.config.settings.http.headers) Object.assign(options.headers, this.config.settings.http.headers)
+		if (this.config.settings.http) options = merge(options, this.config.settings.http)
 		if (this.options.headers) Object.assign(options.headers, this.options.headers)
 		if (this.options.useCookies) {
 			const cookie = this.jar.getCookieStringSync(url)
