@@ -1,5 +1,6 @@
 const fs = require("fs")
 const path = require("path")
+const sjc = require("strip-json-comments")
 
 /**
  * Holds settings that other classes can read to see how they should behave.
@@ -45,7 +46,7 @@ class Config {
 	load(filename) {
 		if (!filename) filename = this.filename
 		let body = fs.readFileSync(filename, {encoding: "utf8"})
-		body = body.replace(/\s+\/\/[^"\n]*$/gm, "") // remove comments
+		body = sjc(body)
 		this.settings = JSON.parse(body)
 		// jankery for correct user-agent string
 		if (this.settings && this.settings.http && this.settings.http.headers && this.settings.http.headers["User-Agent"]) {
