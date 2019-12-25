@@ -50,6 +50,7 @@ class Tracker {
 	}
 
 	_createInstance(site, options) {
+		site = Instance.normaliseConfig(site)[0]
 		if (!this.instances.has(site)) {
 			const instance = new Instance({logger: this.logger, config: this.config}, site, options)
 			this.instances.set(site, instance)
@@ -76,25 +77,36 @@ class Tracker {
 			await Promise.all(data.map(async instance => {
 				if (!Array.isArray(instance)) throw new Error("Unexpected response: level 2 is not array")
 				const info = instance[1]
+				// From here, `return` if any data part is bad. When we reach the bottom, an instance will be created with the current data.
 				if (info.type !== "https") return // we can only use https instances
 				if (this.config.settings.fetch.ignoreDead && info.monitor && +info.monitor.weeklyRatio.ratio === 0) return // don't bother trying health 0
 				if (this.config.settings.fetch.requireVersion.enabled) { // continue to restrict by version info
 					if (info.stats && info.stats.software) { // stats has the information we need
-						if (!semver.gte(info.stats.software.version, this.config.settings.fetch.requireVersion.version)) return
+						if (!semver.gte(info.stats.software.version, this.config.settings.fetch.requireVersion.version)) return // version from stats is outdated
 					} else if (this.config.settings.fetch.requireVersion.fallbackToHome) { // have to fetch from home
+						// We must create an instance here to test against
 						const instance = this._createInstance(info.uri, {available: false})
+						// This is async, so return it. An instance will not be created at the bottom.
 						return instance.getVersionFromHome().then(version => {
 							if (semver.gte(version, this.config.settings.fetch.requireVersion.version)) {
-								// hurrah!
+								// hurrah! version from home is sufficient. mark the temporary instance as usable
 								instance.available = true
 								loadedCount++
 							} else {
-								// :(
+								// outdated instance. delete the temporary instance object
 								this.instances.delete(instance.site)
 							}
-						}).catch(() => {}) // lol
+						}).catch(() => {
+							// version not detectable
+							if (!this.config.settings.fetch.requireVersion.useIfNoVersion) {
+								this.instances.delete(instance.site)
+							}
+						})
+					} else if (!this.config.settings.fetch.requireVersion.useIfNoVersion) { // no stats, no fallback and no use anyway
+						return
 					}
 				}
+				// Got here? All good, create the instance
 				loadedCount++
 				this._createInstance(info.uri, {})
 			}))

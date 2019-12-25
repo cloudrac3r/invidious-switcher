@@ -52,7 +52,8 @@
 			// Would you like to only use instances with a certain version?
 			"enabled": true,
 			// Which version? (Blocked reports were added in 0.20.0)
-			"version": "0.20.0",
+			// Versions with a commit hash are interpreted by semver as prereleases - add "-0" to the end of the string here to match versions with commit hashes. (Highly suggested!)
+			"version": "0.20.0-0",
 			// Normally we get the version from /api/v1/stats, which is handily included in the response from IIVS.
 			// However, some instances disable stats.
 			// It is still possible to get the version by requesting the home page and trying to detect the version number from the contents of the footer, but this is quite slow and might still fail.
