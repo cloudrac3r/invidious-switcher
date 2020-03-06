@@ -265,7 +265,17 @@ class Instance {
 			const cookie = this.jar.getCookieStringSync(url)
 			if (cookie) options.headers["Cookie"] = cookie
 		}
-		return timer(wumpfetch(url, options).send())
+		const inprogress = new Promise((resolve, reject) => {
+			const sent = wumpfetch(url, options).send()
+			if (this.config.settings.http && this.config.settings.http.timeout) {
+				setTimeout(() => {
+					// this will do nothing if `sent` has already completed because promises are good
+					reject(new Error("Manual timeout reached"))
+				}, this.config.settings.http.timeout)
+			}
+			sent.then(resolve, reject)
+		})
+		return timer(inprogress)
 	}
 
 	/**
