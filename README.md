@@ -46,7 +46,7 @@ Remember, just because something is written here, doesn't mean that you should u
 
 If you think there might be several ways of doing something, the one closer to the top is probably more sensible.
 
-Methods and properties that you _probably shouldn't fiddle with_ are prefixed with a \* in this documentation.
+Methods and properties that you _probably shouldn't fiddle with_ are prefixed with a \* in this documentation. Of course, it's JavaScript, and I can't stop you if want to.
 
 ## Exports
 
@@ -105,9 +105,15 @@ Request data from /api/v1/channels/{id}/videos
 
 Request data from /api/v1/videos/{id}/latest
 
+### makeAPIRequest(kind: string, endpoint: string): Promise\<data\>
+
+Request data from any endpoint from an instance. Again, this will intelligently try instances until one works.
+
+The `kind` string describes what the request is for, e.g. `"video"`, `"channel"`, `"playlist"`, or any string that describes what you're doing. This is used in logs and in the request kind blacklist (if the server says that the request is forbidden entirely, all further requests of that kind will be refused without trying). If you want the logs to look pretty, the string can be up to 7 characters.
+
 ### properties
 
-- ready: boolean  
+- ready: boolean
 Whether the switcher is ready
 - events: EventEmitter
 - config: Config

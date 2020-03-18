@@ -38,31 +38,35 @@ class Switcher {
 	}
 
 	/**
-	 * @param {() => Promise<T>} callback
+	 * @param {(instance: import("./Instance")) => Promise<T>} callback
 	 * @returns {Promise<T>}
 	 * @template T
 	 */
-	_repeat(callback) {
-		return callback().catch(() => {
-			return this._repeat(callback)
+	async _repeatWithNewInstance(callback) {
+		const instance = this.tracker.getNextInstance()
+		return callback(instance).catch(() => {
+			return this._repeatWithNewInstance(callback)
 		})
 	}
-		
+
+	makeAPIRequest(kind, endpoint) {
+		return this._repeatWithNewInstance(instance => instance.makeAPIRequest(kind, endpoint))
+	}
 
 	requestVideo(id) {
-		return this._repeat(() => this.tracker.getNextInstance().requestVideo(id))
+		return this._repeatWithNewInstance(instance => instance.requestVideo(id))
 	}
 
 	requestChannel(id) {
-		return this._repeat(() => this.tracker.getNextInstance().requestChannel(id))
+		return this._repeatWithNewInstance(instance => instance.requestChannel(id))
 	}
 
 	requestChannelVideos(id) {
-		return this._repeat(() => this.tracker.getNextInstance().requestChannelVideos(id))
+		return this._repeatWithNewInstance(instance => instance.requestChannelVideos(id))
 	}
 
 	requestChannelLatest(id) {
-		return this._repeat(() => this.tracker.getNextInstance().requestChannelLatest(id))
+		return this._repeatWithNewInstance(instance => instance.requestChannelLatest(id))
 	}
 }
 
