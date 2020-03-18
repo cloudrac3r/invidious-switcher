@@ -53,6 +53,7 @@ class Instance {
 	isWorking() {
 		if (!this.available) return false
 		const records = this.records.slice(0, recordsToCheck)
+		if (!records.length) return true // There's no way to tell, so make it a candidate so that we find out
 		if (this.config.settings.detection.useMedianWorking) {
 			return stats.median(records.map(r => +r.working)) >= this.config.settings.detection.acceptableWorkingRate
 		} else {
