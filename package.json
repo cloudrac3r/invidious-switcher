@@ -14,7 +14,7 @@
   "dependencies": {
     "fast-html-parser": "^1.0.1",
     "merge-options": "^2.0.0",
-    "semver": "^6.3.0",
+    "semver": "^6.3.1",
     "strip-json-comments": "^3.0.1",
     "tough-cookie": "^3.0.1",
     "wumpfetch": "^0.3.1"
